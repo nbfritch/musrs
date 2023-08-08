@@ -1,0 +1,37 @@
+{% extends "layout.j2" %}
+{% block title %}
+Music
+{% endblock title %}
+
+{% block content %}
+<header class="navbar">
+    <nav>
+        <ul role="list">
+            <li>
+                <a href="/">IMP</a>
+                <audio id="audio-player" controls src="/song/1"></audio>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="app-main">
+    <table>
+        <tr class="table-header">
+            <th>Id</th>
+            <th>Song Name</th>
+            <th>Artist</th>
+            <th>Album</th>
+            <th>Info</th>
+        </tr>
+        {% for s in songs %}
+        <tr data-songid="{{s.id}}" class="table-row row-{{ s.id % 2 }}">
+            <td>{{s.id}}</td>
+            <td>{{s.filename}}</td>
+            <td>{{s.artist}}</td>
+            <td>{{s.album}}</td>
+            <td>{{s.full_path}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</main>
+{% endblock content %}

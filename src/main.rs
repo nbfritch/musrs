@@ -1,77 +1,72 @@
-use actix_files::NamedFile;
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
-use std::fs::File;
-use std::io::{Read, Result, Seek, SeekFrom};
+mod errors;
+mod file_utils;
+mod routes;
+mod state;
+mod types;
 
-const MAX_RANGE_BYTES: u64 = 64_000u64;
+use actix_web::{HttpServer, middleware::Logger, App, web};
+use actix_web_static_files::ResourceFiles;
+use file_utils::{crawl_dir, Settings};
+use std::env::var;
+use std::path::Path;
+use types::Song;
 
-fn parse_range(s: &str) -> (u64, Option<u64>) {
-    assert_eq!(&s[0..6], "bytes=");
-    let split = (&s[6..])
-        .split("-")
-        .map(|a| a.to_string())
-        .collect::<Vec<String>>();
-    assert_eq!(split.len(), 2);
-    (
-        u64::from_str_radix(&split[0], 10).unwrap(),
-        match u64::from_str_radix(&split[1], 10) {
-            Err(_) => None,
-            Ok(a) => Some(a),
-        },
-    )
-}
+use crate::{state::AppStateStruct, routes::index::index, routes::song::get_song};
 
-fn serve_file_byte_range(
-    start_byte: u64,
-    end_byte: Option<u64>,
-) -> Result<(u64, u64, u64, Vec<u8>)> {
-    let mut f = File::open("static/song1.flac").unwrap();
-    let file_length = f.metadata().unwrap().len();
-    let use_end_byte = match end_byte {
-        Some(b) => b,
-        None => start_byte + MAX_RANGE_BYTES,
-    };
-    if use_end_byte - start_byte > MAX_RANGE_BYTES {
-        f.seek(SeekFrom::Start(start_byte))?;
-        let mut buf = vec![0; MAX_RANGE_BYTES as usize];
-        f.read_exact(&mut buf)?;
-        Ok((start_byte, use_end_byte, file_length, buf))
-    } else {
-        f.seek(SeekFrom::Start(start_byte))?;
-        let mut buf = vec![0; (use_end_byte - start_byte) as usize];
-        f.read_exact(&mut buf)?;
-        Ok((start_byte, use_end_byte, file_length, buf))
-    }
-}
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
-async fn index(_req: HttpRequest) -> Result<NamedFile> {
-    Ok(NamedFile::open("static/index.html")?)
-}
+#[tokio::main]
+async fn main() {
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-async fn song(request: HttpRequest) -> impl Responder {
-    let range_requested = request.headers().contains_key("Range");
+    //let lib_path = String::from("/home/nathan/mount/storage/Media/Library/Music");
+    let lib_path = var("MUS_DIR").expect("MUS_DIR var is required");
+    let web_port_str: String = var("WEB_PORT").expect("WEB_PORT var is required");
+    let web_port: u16 = web_port_str.parse().expect("Could not parse web port");
+    let web_addr_string = var("WEB_ADDR").expect("WEB_ADDR var is required");
+    let web_addr = web_addr_string.as_str();
+    let start_path = Path::new(&lib_path);
+    println!("Loading library...");
+    let songs: Vec<Song> = tokio::task::block_in_place(|| {
+        let extns = vec!["ogg", "flac", "mp3", "wav"];
+        let settings = Settings {
+            allowed_extensions: extns.iter().map(|e| (**e).to_string()).collect(),
+        };
+        let mut songs = crawl_dir(&settings.allowed_extensions, start_path, start_path).unwrap();
+        songs.sort_unstable_by_key(|a| (a.artist.clone(), a.album.clone(), a.filename.clone()));
+        songs.iter().enumerate().map(|ps| ps.1.with_id(ps.0 as u64)).collect()
+    });
+    println!("Done loading library. Loaded {} songs", songs.len());
 
-    let range_str = request.headers().get("Range").unwrap().to_str().unwrap();
-    let (start_byte, maybe_end_byte) = parse_range(range_str);
-    let (astart, aend, le, buf) = serve_file_byte_range(start_byte, maybe_end_byte).unwrap();
-    let resp = HttpResponse::PartialContent()
-        .append_header((
-            "Content-Range",
-            format!("{} {}-{}/{}", "bytes", astart, aend, le),
-        ))
-        .append_header(("Content-Type", "audio/flac"))
-        .body(buf);
-    resp
-}
+    let template_folder = Path::new("./templates");
 
-#[actix_web::main]
-async fn main() -> Result<()> {
-    HttpServer::new(|| {
+    HttpServer::new(move || {
+        let generated = generate();
+        let song_clone = songs.clone();
+        let state = std::sync::Arc::new(AppStateStruct::new({
+            let mut tera = tera::Tera::new(
+                &(template_folder
+                    .to_str()
+                    .expect("Cannot load templates folder")
+                    .to_string()
+                    + "/**/*"),
+            )
+            .expect("Paring error loading templates folder");
+            tera.autoescape_on(vec!["j2"]);
+            tera
+        }, lib_path.clone()));
+
         App::new()
-            .route("/", web::get().to(index))
-            .route("/song", web::get().to(song))
+            .wrap(Logger::default())
+            .service(ResourceFiles::new("/static", generated))
+            .service(web::resource("/").to(index))
+            .service(get_song)
+            .app_data(web::Data::new(state))
+            .app_data(web::Data::new(song_clone))
     })
-    .bind(("127.0.0.1", 8000))?
+    .bind((web_addr, web_port))
+    .expect("Could not bind address")
     .run()
     .await
+    .expect("Could not start server");
 }

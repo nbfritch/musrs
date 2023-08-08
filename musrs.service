@@ -1,0 +1,17 @@
+[Unit]
+Description=Web music player portal
+
+[Service]
+WorkingDirectory=/usr/local/musrs
+Environment=MUS_DIR=/tank/filesystem/Media/Library/Music
+Environment=WEB_PORT=4000
+Environment=WEB_ADDRESS=0.0.0.0
+ExecStart=/usr/local/musrs/musrs
+ProtectSystem=strict
+ProtectHome=true
+PrivateUsers=true
+PrivateTmp=true
+DynamicUser=yes
+
+[Install]
+WantedBy=multi-user.target

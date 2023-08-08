@@ -1,0 +1,23 @@
+main {
+    max-width: 100%;
+}
+
+.table-header {
+    background-color: azure;
+}
+
+.table-row {
+    border: 1px solid black;
+}
+
+.table-row.row-0 {
+    background-color: aliceblue;
+}
+
+.row-0:hover {
+    color:blue;
+}
+
+.row-1:hover {
+    color: blue;
+}
