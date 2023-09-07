@@ -79,8 +79,8 @@ async fn get_song(
             return HttpResponse::BadRequest().json(json!({"message": "Invalid song id"}));
         }
         let song = song_values[song_id as usize].clone();
-        let content_type = extension_content_type(song.extension);
-        (song.filepath, content_type)
+        let content_type = extension_content_type(song.file_extension);
+        (song.file_path, content_type)
     };
     let base_path = state.into_inner().library_path.clone();
     let absolute_path = std::path::Path::new(&base_path).join(file_path).to_str().unwrap().to_string();

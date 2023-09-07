@@ -1,2 +1,4 @@
 target/
 public/css/missing.css
+library.db
+.env

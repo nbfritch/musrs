@@ -4,22 +4,24 @@ mod routes;
 mod state;
 mod types;
 
+use std::env::var;
+use std::path::Path;
+
 use actix_web::{HttpServer, middleware::Logger, App, web};
 use actix_web_static_files::ResourceFiles;
 use file_utils::{crawl_dir, Settings};
-use std::env::var;
-use std::path::Path;
+use sqlx::sqlite::SqlitePoolOptions;
 use types::Song;
 
-use crate::{state::AppStateStruct, routes::index::index, routes::song::get_song};
+use crate::{state::AppStateStruct, routes::index::index, routes::song::get_song, file_utils::dump_tags};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().expect("Failed to load env");
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    //let lib_path = String::from("/home/nathan/mount/storage/Media/Library/Music");
     let lib_path = var("MUS_DIR").expect("MUS_DIR var is required");
     let web_port_str: String = var("WEB_PORT").expect("WEB_PORT var is required");
     let web_port: u16 = web_port_str.parse().expect("Could not parse web port");
@@ -38,7 +40,31 @@ async fn main() {
     });
     println!("Done loading library. Loaded {} songs", songs.len());
 
+    let mut max_path_len: usize = 0;
+    let mut max_filename_len: usize = 0;
+    for s in songs.iter() {
+        if s.file_path.len() > max_path_len {
+            max_path_len = s.file_path.len();
+        }
+
+        if s.file_name.len() > max_filename_len {
+            max_filename_len = s.file_name.len();
+        }
+    }
+
+    println!("Max Path {}", max_path_len);
+    println!("Max File {}", max_filename_len);
+
+    // dump_tags(start_path, &songs);
+
     let template_folder = Path::new("./templates");
+
+    let db_url = var("DATABASE_URL").expect("'DATABASE_URL is required");
+    let pool = SqlitePoolOptions::new()
+        .max_connections(5)
+        .connect(&db_url)
+        .await
+        .expect("Could not connect to db");
 
     HttpServer::new(move || {
         let generated = generate();
@@ -63,6 +89,7 @@ async fn main() {
             .service(get_song)
             .app_data(web::Data::new(state))
             .app_data(web::Data::new(song_clone))
+            .app_data(pool.clone())
     })
     .bind((web_addr, web_port))
     .expect("Could not bind address")
