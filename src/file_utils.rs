@@ -1,3 +1,4 @@
+use audiotags::{AudioTag, Tag};
 use sqlx::pool::PoolConnection;
 use sqlx::{Pool, Sqlite};
 
@@ -85,31 +86,61 @@ fn unix_timestamp() -> i64 {
     SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64
 }
 
-pub async fn save_metadata(conn: &mut PoolConnection<Sqlite>, song: &Song, base_path: &Path) -> Result<()> {
+async fn save_metadata(conn: &mut PoolConnection<Sqlite>, song: &Song, id: i64, base_path: &Path) -> anyhow::Result<()> {
     let joined_path = base_path.join(song.full_path.clone());
     let abs_path = joined_path.as_path();
-    let tag = audiotags::Tag::new().read_from_path(abs_path).map_err(|e| e.into())?;
-    let metadata = TrackMetadata {
-        title: tag.title().map(|t| String::from(t))
-    }
-    println!("Read tags for {}", song.full_path);
-    tag.title().map(|t| println!("Title: {}", t));
-    tag.artists().map(|a| a.iter().map(|art| println!("Artist(s): {}", *art)).collect::<Vec<()>>());
-    tag.year().map(|y| println!("Year: {}", y));
-    tag.duration().map(|d| pretty_duration(d)).map(|d| println!("Duration: {}", d));
-    tag.album_title().map(|at| println!("Album Title: {}", at));
-    tag.album_artists().map(|aa| aa.iter().map(|a| println!("Album Artist: {}", *a)).collect::<Vec<()>>());
-    tag.track_number().map(|t| println!("Track Number: {}", t));
-    tag.total_tracks().map(|t| println!("Total Tracks: {}", t));
-    tag.disc_number().map(|d| println!("Disc: {}", d));
-    tag.total_discs().map(|td| println!("Total Discs: {}", td));
-    tag.genre().map(|g| println!("Genre: {}", g));
-    tag.composer().map(|c| println!("Composer: {}", c));
-    println!("");
+    let tag_res = audiotags::Tag::new().read_from_path(abs_path);
+
+    let metadata: TrackMetadata = match tag_res {
+        Ok(tag) => TrackMetadata {
+            file_artifact_id: id,
+            title: tag.title().map(|t| String::from(t)),
+            album: tag.album_title().map(|a| String::from(a)),
+            artist: tag.artist().map(|a| String::from(a)),
+            year: tag.year().map(|y| y as u16),
+            duration: tag.duration().map(|d| d.ceil() as u32),
+            genre: tag.genre().map(|g| String::from(g)),
+            composer: tag.composer().map(|c| String::from(c)),
+            track_number: tag.track_number()
+        },
+        Err(e) => {
+            let mut x = TrackMetadata::default();
+            x.file_artifact_id = id;
+            x
+        },
+    };
+
+    let meta_insert = sqlx::query!("
+        insert into track_metadata (
+            filesystem_artifact_id,
+            artist,
+            album,
+            track_name,
+            genre,
+            composer,
+            release_year,
+            track_number,
+            duration
+        ) values (
+            ?, ?, ?, ?, ?, ?, ?, ?, ? )",
+        metadata.file_artifact_id,
+        metadata.artist,
+        metadata.album,
+        metadata.title,
+        metadata.genre,
+        metadata.composer,
+        metadata.year,
+        metadata.track_number,
+        metadata.duration)
+        .execute(conn.as_mut())
+        .await?;
+
+    println!("Inserted {} rows", meta_insert.rows_affected());
+
     Ok(())
 }
 
-pub async fn find_or_create_song(conn: &mut PoolConnection<Sqlite>, song: &Song) -> sqlx::Result<i64> {
+async fn find_or_create_song(conn: &mut PoolConnection<Sqlite>, song: &Song) -> sqlx::Result<i64> {
     let existing_id = sqlx::query!("
         select 
             f.id
@@ -156,9 +187,7 @@ pub async fn find_or_create_song(conn: &mut PoolConnection<Sqlite>, song: &Song)
     Ok(created_id)
 }
 
-
-
-pub async fn startup_scan(base_path: &Path, files: &Vec<Song>, db: &Pool<Sqlite>) {
+pub async fn startup_scan(base_path: &Path, files: &Vec<Song>, db: &Pool<Sqlite>) -> anyhow::Result<()> {
     // for each song
     // look for a song in the same file path
     // if it exists do nothing
@@ -168,49 +197,19 @@ pub async fn startup_scan(base_path: &Path, files: &Vec<Song>, db: &Pool<Sqlite>
     // do nothing
     // if the file does not exist in the list we were given
     // update the db row to is_present = false
-    let mut conn = db.acquire().await.expect("Could not aquire db handle");
+    let mut conn = db.acquire().await?;
 
     for song in files.iter() {
-        let song_res = find_or_create_song(&mut conn, song).await;
-        match song_res {
-            Ok(song_id) => {
-
-            },
-            Err(e) => {
-                println!("Error creating song {}:{}", song.full_path);
-            }
+        let song_id = find_or_create_song(&mut conn, song).await?;
+        let has_meta = sqlx::query!("
+            select filesystem_artifact_id from track_metadata
+            where filesystem_artifact_id = ?
+        ", song_id).fetch_optional(conn.as_mut())
+        .await?.is_some();
+        if !has_meta {
+            save_metadata(&mut conn, song, song_id, base_path).await?;
         }
-
-
     }
-}
 
-pub fn dump_tags(base_path: &Path, files: &Vec<Song>) {
-    files.iter().for_each(|song| {
-        let joined_path = base_path.join(song.full_path.clone());
-        let abs_path = joined_path.as_path();
-        let tag = audiotags::Tag::new().read_from_path(abs_path);
-        match tag {
-            Ok(btag) => {
-                println!("Read tags for {}", song.full_path);
-                btag.title().map(|t| println!("Title: {}", t));
-                btag.artists().map(|a| a.iter().map(|art| println!("Artist(s): {}", *art)).collect::<Vec<()>>());
-                btag.year().map(|y| println!("Year: {}", y));
-                btag.duration().map(|d| pretty_duration(d)).map(|d| println!("Duration: {}", d));
-                btag.album_title().map(|at| println!("Album Title: {}", at));
-                btag.album_artists().map(|aa| aa.iter().map(|a| println!("Album Artist: {}", *a)).collect::<Vec<()>>());
-                btag.track_number().map(|t| println!("Track Number: {}", t));
-                btag.total_tracks().map(|t| println!("Total Tracks: {}", t));
-                btag.disc_number().map(|d| println!("Disc: {}", d));
-                btag.total_discs().map(|td| println!("Total Discs: {}", td));
-                btag.genre().map(|g| println!("Genre: {}", g));
-                btag.composer().map(|c| println!("Composer: {}", c));
-                println!("");
-            }
-            Err(e) => {
-                println!("Err parsing {}: {}", song.full_path, e);
-                println!("");
-            },
-        }
-    })
+    Ok(())
 }

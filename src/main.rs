@@ -13,7 +13,7 @@ use file_utils::{crawl_dir, Settings};
 use sqlx::sqlite::SqlitePoolOptions;
 use types::Song;
 
-use crate::{state::AppStateStruct, routes::index::index, routes::song::get_song, file_utils::dump_tags};
+use crate::{state::AppStateStruct, routes::index::index, routes::song::get_song, file_utils::startup_scan};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -40,23 +40,6 @@ async fn main() {
     });
     println!("Done loading library. Loaded {} songs", songs.len());
 
-    let mut max_path_len: usize = 0;
-    let mut max_filename_len: usize = 0;
-    for s in songs.iter() {
-        if s.file_path.len() > max_path_len {
-            max_path_len = s.file_path.len();
-        }
-
-        if s.file_name.len() > max_filename_len {
-            max_filename_len = s.file_name.len();
-        }
-    }
-
-    println!("Max Path {}", max_path_len);
-    println!("Max File {}", max_filename_len);
-
-    // dump_tags(start_path, &songs);
-
     let template_folder = Path::new("./templates");
 
     let db_url = var("DATABASE_URL").expect("'DATABASE_URL is required");
@@ -65,6 +48,17 @@ async fn main() {
         .connect(&db_url)
         .await
         .expect("Could not connect to db");
+
+    let startup_res = startup_scan(start_path, &songs, &pool).await;
+    match startup_res {
+        Ok(()) => {
+            println!("Startup succeeded");
+        },
+        Err(e) => {
+            println!("Error during startup scan {}", e);
+        }
+    }
+
 
     HttpServer::new(move || {
         let generated = generate();
