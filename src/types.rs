@@ -36,11 +36,11 @@ pub struct Song {
 }
 
 pub struct TrackMetadata {
-    title: String,
-    album: Option<String>,
-    artist: Option<String>,
-    year: Option<u16>,
-    duration: Option<u32>,
-    genre: Option<String>,
-    composer: Option<String>,
+    pub title: String,
+    pub album: Option<String>,
+    pub artist: Option<String>,
+    pub year: Option<u16>,
+    pub duration: Option<u32>,
+    pub genre: Option<String>,
+    pub composer: Option<String>,
 }

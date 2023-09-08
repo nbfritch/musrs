@@ -1,9 +1,11 @@
+use sqlx::pool::PoolConnection;
 use sqlx::{Pool, Sqlite};
 
-use crate::types::{PartialSong, Song};
+use crate::types::{PartialSong, Song, TrackMetadata};
 use std::fs;
 use std::io::Result;
 use std::path::Path;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Settings {
     pub allowed_extensions: Vec<String>,
@@ -79,6 +81,83 @@ fn pretty_duration(duration: f64) -> String {
     format!("{}:{:02}", int_duration / 60, int_duration % 60)
 }
 
+fn unix_timestamp() -> i64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64
+}
+
+pub async fn save_metadata(conn: &mut PoolConnection<Sqlite>, song: &Song, base_path: &Path) -> Result<()> {
+    let joined_path = base_path.join(song.full_path.clone());
+    let abs_path = joined_path.as_path();
+    let tag = audiotags::Tag::new().read_from_path(abs_path).map_err(|e| e.into())?;
+    let metadata = TrackMetadata {
+        title: tag.title().map(|t| String::from(t))
+    }
+    println!("Read tags for {}", song.full_path);
+    tag.title().map(|t| println!("Title: {}", t));
+    tag.artists().map(|a| a.iter().map(|art| println!("Artist(s): {}", *art)).collect::<Vec<()>>());
+    tag.year().map(|y| println!("Year: {}", y));
+    tag.duration().map(|d| pretty_duration(d)).map(|d| println!("Duration: {}", d));
+    tag.album_title().map(|at| println!("Album Title: {}", at));
+    tag.album_artists().map(|aa| aa.iter().map(|a| println!("Album Artist: {}", *a)).collect::<Vec<()>>());
+    tag.track_number().map(|t| println!("Track Number: {}", t));
+    tag.total_tracks().map(|t| println!("Total Tracks: {}", t));
+    tag.disc_number().map(|d| println!("Disc: {}", d));
+    tag.total_discs().map(|td| println!("Total Discs: {}", td));
+    tag.genre().map(|g| println!("Genre: {}", g));
+    tag.composer().map(|c| println!("Composer: {}", c));
+    println!("");
+    Ok(())
+}
+
+pub async fn find_or_create_song(conn: &mut PoolConnection<Sqlite>, song: &Song) -> sqlx::Result<i64> {
+    let existing_id = sqlx::query!("
+        select 
+            f.id
+        from filesystem_artifacts f
+        where
+            f.file_name = ?
+            and f.file_extension = ?
+            and f.relative_path = ?",
+            song.file_name,
+            song.file_extension,
+            song.file_path)
+        .fetch_optional(conn.as_mut())
+        .await
+        .map(|r| r.map(|g| g.id))?;
+
+    if let Some(id) = existing_id {
+        return Ok(id);
+    }
+
+    let now = unix_timestamp();
+    let created_id = sqlx::query!("
+        insert into filesystem_artifacts (
+            relative_path,
+            file_name,
+            file_extension,
+            is_present,
+            first_path_segment,
+            second_path_segment,
+            created_at,
+            updated_at
+        ) values (
+            ?, ?, ?, TRUE, ?, ?, ?, NULL
+        ) returning id;",
+        song.file_path,
+        song.file_name,
+        song.file_extension,
+        song.artist,
+        song.album,
+        now,
+    ).fetch_one(conn.as_mut())
+    .await?
+    .id;
+
+    Ok(created_id)
+}
+
+
+
 pub async fn startup_scan(base_path: &Path, files: &Vec<Song>, db: &Pool<Sqlite>) {
     // for each song
     // look for a song in the same file path
@@ -92,16 +171,17 @@ pub async fn startup_scan(base_path: &Path, files: &Vec<Song>, db: &Pool<Sqlite>
     let mut conn = db.acquire().await.expect("Could not aquire db handle");
 
     for song in files.iter() {
-        let has_existing_song = sqlx::query!("
-            select f.id from filesystem_artifacts f
-            where f.file_name = ? and f.file_extension = ? and f.relative_path = ?
-            ", song.file_name, song.file_extension, song.file_path)
-            .fetch_optional(conn.as_mut())
-            .await
-            .map(|r| {
-                r.map(|r| r.id > 0)
-            }).unwrap_or(Some(false))
-            .unwrap_or(false);
+        let song_res = find_or_create_song(&mut conn, song).await;
+        match song_res {
+            Ok(song_id) => {
+
+            },
+            Err(e) => {
+                println!("Error creating song {}:{}", song.full_path);
+            }
+        }
+
+
     }
 }
 

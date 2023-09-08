@@ -1,19 +1,19 @@
 create table filesystem_artifacts (
     id integer primary key autoincrement,
     relative_path varchar(256) not null,
-    file_name varchar(100) not null,
+    file_name varchar(200) not null,
     file_extension varchar(12) not null,
     is_present bit not null,
-    first_path_segment varchar(48) null,
-    second_path_segment varchar(48) null,
+    first_path_segment varchar(150) null,
+    second_path_segment varchar(150) null,
     created_at integer not null,
     updated_at integer
 );
 
 create table track_metadata (
     filesystem_artifact_id integer not null primary key,
-    artist varchar(128),
-    album varchar(128),
+    artist varchar(200),
+    album varchar(200),
     track_name varchar(200),
     genre varchar(40),
     composer varchar(40),
