@@ -2,6 +2,7 @@
 pub enum GenError {
     OtherError(String),
     TemplateError(tera::Error),
+    DatabaseError(sqlx::Error),
 }
 
 impl actix_web::error::ResponseError for GenError {
@@ -9,6 +10,7 @@ impl actix_web::error::ResponseError for GenError {
         match *self {
             Self::OtherError(_) => actix_web::http::StatusCode::SEE_OTHER,
             Self::TemplateError(_) => actix_web::http::StatusCode::SERVICE_UNAVAILABLE,
+            Self::DatabaseError(_) => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
@@ -26,6 +28,10 @@ impl actix_web::error::ResponseError for GenError {
                 actix_web::HttpResponse::build(actix_web::http::StatusCode::SERVICE_UNAVAILABLE)
                     .body("<h1>Please, try again later</h1>")
             }
+            GenError::DatabaseError(e) => {
+                actix_web::HttpResponse::build(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(format!("<div><h1>Error</h1><p>{}</p></div>", e))
+            }
         }
     }
 }
@@ -35,6 +41,7 @@ impl std::fmt::Display for GenError {
         match self {
             GenError::OtherError(e) => write!(f, "other error: {e}"),
             GenError::TemplateError(e) => write!(f, "cannot parse template: {e}"),
+            GenError::DatabaseError(e) => write!(f, "database error: {e}"),
         }
     }
 }
@@ -48,5 +55,11 @@ impl From<String> for GenError {
 impl From<tera::Error> for GenError {
     fn from(value: tera::Error) -> Self {
         Self::TemplateError(value)
+    }
+}
+
+impl From<sqlx::Error> for GenError {
+    fn from(value: sqlx::Error) -> Self {
+        Self::DatabaseError(value)
     }
 }

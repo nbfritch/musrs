@@ -1,4 +1,4 @@
-use actix_web::{web, HttpRequest, HttpResponse, Responder, get};
+use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use serde_json::json;
 use std::fs::File;
 use std::io::{Read, Result, Seek, SeekFrom};
@@ -68,7 +68,7 @@ async fn get_song(
     request: HttpRequest,
     state: web::Data<crate::state::AppState>,
     songs: web::Data<Vec<Song>>,
-    path: web::Path<u64>
+    path: web::Path<u64>,
 ) -> impl Responder {
     let song_id = path.into_inner();
     let range_str = request.headers().get("Range").unwrap().to_str().unwrap();
@@ -83,13 +83,24 @@ async fn get_song(
         (song.file_path, content_type)
     };
     let base_path = state.into_inner().library_path.clone();
-    let absolute_path = std::path::Path::new(&base_path).join(file_path).to_str().unwrap().to_string();
-    let (astart, _aend, le, buf) = serve_file_byte_range(absolute_path, start_byte, maybe_end_byte).unwrap();
-    
+    let absolute_path = std::path::Path::new(&base_path)
+        .join(file_path)
+        .to_str()
+        .unwrap()
+        .to_string();
+    let (astart, _aend, le, buf) =
+        serve_file_byte_range(absolute_path, start_byte, maybe_end_byte).unwrap();
+
     let resp = HttpResponse::PartialContent()
         .append_header((
             "Content-Range",
-            format!("{} {}-{}/{}", "bytes", astart, astart + buf.len() as u64, le),
+            format!(
+                "{} {}-{}/{}",
+                "bytes",
+                astart,
+                astart + buf.len() as u64,
+                le
+            ),
         ))
         .append_header(("Content-Type", content_type))
         .body(buf);

@@ -62,3 +62,16 @@ impl Default for TrackMetadata {
         }
     }
 }
+
+#[derive(Serialize)]
+pub struct LibraryRow {
+    pub id: i64,
+    pub track_name: String,
+    pub duration: Option<String>,
+    pub artist: String,
+    pub album: String,
+    pub track_number: Option<u16>,
+    pub genre: Option<String>,
+    pub composer: Option<String>,
+    pub release_year: Option<u16>,
+}

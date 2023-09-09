@@ -1,4 +1,3 @@
-use audiotags::{AudioTag, Tag};
 use sqlx::pool::PoolConnection;
 use sqlx::{Pool, Sqlite};
 
@@ -77,9 +76,8 @@ pub fn crawl_dir(
     Ok(entries)
 }
 
-fn pretty_duration(duration: f64) -> String {
-    let int_duration = duration.ceil() as u64;
-    format!("{}:{:02}", int_duration / 60, int_duration % 60)
+pub fn pretty_duration(duration: i64) -> String {
+    format!("{}:{:02}", duration / 60, duration % 60)
 }
 
 fn unix_timestamp() -> i64 {
@@ -103,7 +101,7 @@ async fn save_metadata(conn: &mut PoolConnection<Sqlite>, song: &Song, id: i64, 
             composer: tag.composer().map(|c| String::from(c)),
             track_number: tag.track_number()
         },
-        Err(e) => {
+        Err(_e) => {
             let mut x = TrackMetadata::default();
             x.file_artifact_id = id;
             x

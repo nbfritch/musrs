@@ -14,24 +14,35 @@ Music
         </ul>
     </nav>
 </header>
-<main id="app-main">
-    <table>
-        <tr class="table-header">
-            <th>Id</th>
-            <th>Song Name</th>
-            <th>Artist</th>
-            <th>Album</th>
-            <th>Info</th>
-        </tr>
+
+<div class="divTable" style="border: 1px solid #000;">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead col-id">Id</div>
+            <div class="divTableHead col-track-name">Track Name</div>
+            <div class="divTableHead col-dur">Time</div>
+            <div class="divTableHead col-artist">Artist</div>
+            <div class="divTableHead col-album">Album</div>
+            <div class="divTableHead col-track-num">#</div>
+            <div class="divTableHead col-genre">Genre</div>
+            <div class="divTableHead col-composer">Composer</div>
+            <div class="divTableHead col-year">Year</div>
+        </div>
+    </div>
+    <div class="divTableBody">
         {% for s in songs %}
-        <tr data-songid="{{s.id}}" class="table-row row-{{ s.id % 2 }}">
-            <td>{{s.id}}</td>
-            <td>{{s.filename}}</td>
-            <td>{{s.artist}}</td>
-            <td>{{s.album}}</td>
-            <td>{{s.full_path}}</td>
-        </tr>
+        <div data-songid="{{s.id}}" class="divTableRow row-{{ s.id % 2 }}">
+            <div class="divTableCell col-id">{{s.id}}</div>
+            <div class="divTableCell col-track-name">{{s.track_name}}</div>
+            <div class="divTableCell col-dur">{{s.duration}}</div>
+            <div class="divTableCell col-artist">{{s.artist}}</div>
+            <div class="divTableCell col-album">{{s.album}}</div>
+            <div class="divTableCell col-track-num">{{s.track_number}}</div>
+            <div class="divTableCell col-genre">{{s.genre}}</div>
+            <div class="divTableCell col-composer">{{s.composer}}</div>
+            <div class="divTableCell col-year">{{s.release_year}}</div>
+        </div>
         {% endfor %}
-    </table>
-</main>
+    </div>
+</div>
 {% endblock content %}
