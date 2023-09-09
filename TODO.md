@@ -1,16 +1,11 @@
 # TODO:
-- Make the table headers stick to the top
-- Figure out the parts of `missing.css` I actually need and get rid of the rest
 - Style the audio player (Possibly to mimic old itunes)
 - Support playlists / a queue of some sort
 - Support some sort of filtering
 - Show info about the current song
 - Figure out what the best size for range requests is
-- Read data from existing id3 tags
-- Persist library somehow, so we don't have to read from disk on startup
 - Album Art
 - Write containerfile with music mounted as a readonly volume
-- Store metadata as external sqlite db
 - Support more file types than wav/flac/mp3/ogg
 - Stop playing / loop around when reaching the end of the library
 - Keyboard shortcuts
