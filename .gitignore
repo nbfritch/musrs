@@ -2,3 +2,5 @@ target/
 public/css/missing.css
 library.db
 .env
+*.tar.gz
+musrs-release-*

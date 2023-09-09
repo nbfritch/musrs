@@ -21,7 +21,10 @@ include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().expect("Failed to load env");
+    if cfg!(debug_assertions) {
+        dotenvy::dotenv().expect("Failed to load dotenv");
+    }
+
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     let lib_path = var("MUS_DIR").expect("MUS_DIR var is required");

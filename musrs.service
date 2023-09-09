@@ -6,12 +6,15 @@ WorkingDirectory=/usr/local/musrs
 Environment=MUS_DIR=/tank/filesystem/Media/Library/Music
 Environment=WEB_PORT=4000
 Environment=WEB_ADDRESS=0.0.0.0
+Environment=DATABASE_URL=library.db
+ReadWritePaths=/usr/local/musrs
 ExecStart=/usr/local/musrs/musrs
-ProtectSystem=strict
+ProtectSystem=no
+NoNewPrivileges
 ProtectHome=true
 PrivateUsers=true
 PrivateTmp=true
-DynamicUser=yes
+User=musrs
 
 [Install]
 WantedBy=multi-user.target
