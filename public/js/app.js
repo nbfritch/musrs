@@ -19,7 +19,7 @@ const main = () => {
     const playerEl = getPlayer();
     playerEl.addEventListener('ended', () => nextSong());
 
-    const allRows = Array.from(document.getElementsByClassName('table-row'));
+    const allRows = Array.from(document.getElementsByClassName('divTableRow'));
     allRows.forEach(tableEl => {
         const songId = tableEl.getAttribute('data-songid');
         if (songId == null) {
