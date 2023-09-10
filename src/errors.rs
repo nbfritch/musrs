@@ -1,3 +1,5 @@
+use std::io;
+
 #[derive(Debug)]
 pub enum GenError {
     OtherError(String),
@@ -61,5 +63,11 @@ impl From<tera::Error> for GenError {
 impl From<sqlx::Error> for GenError {
     fn from(value: sqlx::Error) -> Self {
         Self::DatabaseError(value)
+    }
+}
+
+impl From<io::Error> for GenError {
+    fn from(value: io::Error) -> Self {
+        Self::OtherError(format!("{}", value))
     }
 }
