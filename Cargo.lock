@@ -1304,7 +1304,7 @@ checksum = "07dcca13d1740c0a665f77104803360da0bdb3323ecce2e93fa2c959a6d52806"
 
 [[package]]
 name = "musrs"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "actix-files",
  "actix-web",
