@@ -7,17 +7,57 @@ const selectSong = (songId) => {
     audioElement.play();
 };
 
-const nextSong = () => {
+const changeSong = (offset) => {
     const audioElement = getPlayer();
-    const currentSongId = parseInt(audioElement.getAttribute('data-songid'));
-    audioElement.setAttribute('src', `/song/${currentSongId + 1}`);
-    audioElement.setAttribute('data-songid', currentSongId + 1);
+    const currentSongId = parseInt(audioElement.getAttribute('data-songid'), 10);
+    audioElement.setAttribute('src', `/song/${currentSongId + offset}`);
+    audioElement.setAttribute('data-songid', currentSongId + offset);
     audioElement.play();
+}
+
+const nextSong = () => {
+    changeSong(1);
+};
+
+const prevSong = () => {
+    changeSong(-1);
+};
+
+const togglePlay = () => {
+    const player = getPlayer();
+    if (player.paused) {
+        player.play();
+    } else {
+        player.pause();
+    }
 };
 
 const main = () => {
     const playerEl = getPlayer();
     playerEl.addEventListener('ended', () => nextSong());
+
+    document.addEventListener('keydown', ev => {
+        let keep = false;
+        console.log(ev.code);
+        switch (ev.code) {
+            case 'KeyN':
+                keep = true;
+                nextSong();
+                break;
+            case 'KeyD':
+                keep = true;
+                prevSong();
+                break;
+            case 'Space':
+                keep = true;
+                togglePlay();
+                break;
+        }
+
+        if (keep) {
+            ev.preventDefault();
+        }
+    });
 
     const allRows = Array.from(document.getElementsByClassName('divTableRow'));
     allRows.forEach(tableEl => {

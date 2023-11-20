@@ -1,3 +1,4 @@
+#![feature(type_alias_impl_trait)]
 mod errors;
 mod file_utils;
 mod routes;

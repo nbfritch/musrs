@@ -4,3 +4,4 @@ library.db
 .env
 *.tar.gz
 musrs-release-*
+dev.db

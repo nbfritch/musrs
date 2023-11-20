@@ -3,9 +3,6 @@
 - Support playlists / a queue of some sort
 - Support some sort of filtering
 - Show info about the current song
-- Figure out what the best size for range requests is
 - Album Art
 - Write containerfile with music mounted as a readonly volume
-- Support more file types than wav/flac/mp3/ogg
 - Stop playing / loop around when reaching the end of the library
-- Keyboard shortcuts
