@@ -1,5 +1,6 @@
 # TODO:
 - Sort songs in library view (Artist -> Album -> Track Number -> Name)
+- Make sort case insensitive (lowercase names are at the bottom)
 - Hide song id in library view
 - Nix devshell, package as nix flake
 - Style the audio player (Possibly to mimic old itunes)
