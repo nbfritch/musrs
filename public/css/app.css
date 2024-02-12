@@ -3,15 +3,12 @@ body {
     margin: 0;
 }
 
-.table-header {
-    background-color: azure;
-}
-
 header {
     position: fixed;
     top: 0;
     width: 100%;
     background: white;
+    padding-bottom: 8px;
 }
 
 .row-0:hover {
@@ -74,7 +71,7 @@ header {
 }
 
 .col-track-name {
-    width: 28%;
+    width: 32%;
 }
 
 .col-dur {
@@ -82,11 +79,12 @@ header {
 }
 
 .col-artist {
-    width: 18%;
+    width: 22%;
+    padding-left: 10px;
 }
 
 .col-album {
-    width: 14%
+    width: 19%
 }
 
 .col-track-num {
@@ -97,10 +95,41 @@ header {
     width: 10%;
 }
 
-.col-composer {
-    width: 14%;
-}
-
 .col-year {
     width: 8%
+}
+
+body {
+    font-family: sans;
+}
+
+#now-playing-section {
+    display: flex;
+}
+
+#now-playing-section.hidden {
+    display: none;
+}
+
+#audio-player {
+    padding-top: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 90%;
+}
+
+li {
+    list-style: none;
+}
+
+.now-playing-info {
+    padding-left: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.bold {
+    font-weight: bold;
 }

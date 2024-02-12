@@ -10,14 +10,15 @@ pub async fn index(
     let mut conn = db.acquire().await?;
     let songs = sqlx::query!(
         "
+        select * from (
         select
             f.id,
             f.file_name,
             f.first_path_segment,
             f.second_path_segment,
-            t.artist,
-            t.album,
-            t.track_name,
+            ifnull(t.artist, f.first_path_segment) as artist,
+            ifnull(t.album, f.second_path_segment) as album,
+            ifnull(t.track_name, f.file_name) as track_name,
             t.genre,
             t.composer,
             t.release_year,
@@ -26,6 +27,8 @@ pub async fn index(
         from filesystem_artifacts f
         left join track_metadata t
             on t.filesystem_artifact_id = f.id
+        ) a
+        order by a.artist, a.album, a.track_number, a.track_name
     "
     )
     .fetch_all(conn.as_mut())
@@ -33,7 +36,7 @@ pub async fn index(
     .iter()
     .map(|r| LibraryRow {
         id: r.id,
-        track_name: r.track_name.clone().unwrap_or(r.file_name.clone()),
+        track_name: r.track_name.clone(),
         duration: r.duration.map(|d| pretty_duration(d)),
         artist: r
             .artist

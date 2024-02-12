@@ -1,4 +1,7 @@
 # TODO:
+- Sort songs in library view (Artist -> Album -> Track Number -> Name)
+- Hide song id in library view
+- Nix devshell, package as nix flake
 - Style the audio player (Possibly to mimic old itunes)
 - Support playlists / a queue of some sort
 - Support some sort of filtering
