@@ -22,7 +22,7 @@ Music
             </div>
         </div>
         <div>
-            <audio id="audio-player" controls src="/song/1" preload="auto" data-songid="1"></audio>
+            <audio id="audio-player" controls preload="auto" data-playlist-id="0"></audio>
         </div>
     </nav>
 </header>
@@ -42,7 +42,7 @@ Music
     </div>
     <div class="divTableBody">
         {% for s in songs %}
-        <div id="song-{{s.id}}" data-songid="{{s.id}}" class="divTableRow row-{{ s.id % 2 }}">
+        <div id="playlist-id-{{ loop.index0 }}" data-songid="{{s.id}}" class="divTableRow row-{{ loop.index % 2 }}">
             <div class="divTableCell col-id"></div>
             <div id="song-{{s.id}}-name" class="divTableCell col-track-name">{{s.track_name}}</div>
             <div class="divTableCell col-dur">{{s.duration}}</div>

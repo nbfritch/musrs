@@ -27,6 +27,7 @@
               rustToolchain
               sqlite
               rust-analyzer
+              nodePackages.typescript-language-server
             ];
           };
         }

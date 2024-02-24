@@ -1,5 +1,14 @@
 const getPlayer = () => document.getElementById('audio-player');
 
+// Need to create a "playlist-id" which is just the index in the library list
+// and increment that instead of the song id. So clicking a song takes
+// the attached playlist id and looks up the song id, and sets that
+// as the audio tag source
+
+// ALSO I super want this to be typescript so I can reason about what the fuck is happening
+// SO it needs to go through the bundler, get hashed etc, like I did for the temperature 
+// project
+
 const displayNothingPlaying = (state) => {
     const message = document.getElementById('nothing-playing');
     const nowPlaying = document.getElementById('now-playing-section');
@@ -50,7 +59,6 @@ const selectSong = (songId) => {
     audioElement.setAttribute('src', `/song/${songId}`);
     audioElement.setAttribute('data-songid', songId);
     displayNothingPlaying(false);
-    setCurrentSongId(songId);
     displayTrackMetadata(songId);
     audioElement.play();
 };
