@@ -24,9 +24,11 @@
         {
           devShells.default = mkShell {
             buildInputs = [
+              bashInteractive
               rustToolchain
               sqlite
               rust-analyzer
+              bun
               nodePackages.typescript-language-server
             ];
           };
