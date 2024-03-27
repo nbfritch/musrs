@@ -1,14 +1,33 @@
-const Row = () => {
+export interface ITrack {
+  id: number;
+  name: string;
+  duration: string;
+  artist: string;
+  album: string;
+  trackNumber: number;
+  genre: string;
+  releaseYear: string;
+}
+
+export interface IRowProps {
+  index: number;
+  track: ITrack;
+  isPlaying: boolean;
+  // Signal when clicked
+}
+
+const Row = (props: IRowProps) => {
+  const { index, track, isPlaying } = props;
   return (    
-    <div class="table-row row-{{ loop.index % 2 }}">
-      <div class="table-cell w-[2%]"></div>
-      <div id="song-{{s.id}}-name" class="table-cell w-[32%]">s.track_name</div>
-      <div class="table-cell w-[2%]">s.duration</div>
-      <div id="song-{{s.id}}-artist" class="table-cell w-[22%]">s.artist</div>
-      <div id="song-{{s.id}}-album" class="table-cell w-[19%]">s.album</div>
-      <div class="table-cell w-[3%]">s.track_number</div>
-      <div class="table-cell w-[10%]">s.genre</div>
-      <div class="table-cell w-[8%]">s.release_year</div>
+    <div class={`table-row hover:text-blue-600 ${ index % 2 === 0 ? 'bg-blue-200' : 'bg-white' }`}>
+      <div class="table-cell w-[2%]">{isPlaying ? 'P' : ''}</div>
+      <div id="song-{{s.id}}-name" class="table-cell w-[32%]">{track.name}</div>
+      <div class="table-cell w-[2%]">{track.duration}</div>
+      <div id="song-{{s.id}}-artist" class="table-cell w-[22%] pl-10">{track.artist}</div>
+      <div id="song-{{s.id}}-album" class="table-cell w-[19%]">{track.album}</div>
+      <div class="table-cell w-[3%]">{track.trackNumber}</div>
+      <div class="table-cell w-[10%]">{track.genre}</div>
+      <div class="table-cell w-[8%]">{track.releaseYear}</div>
     </div>
   );
 };

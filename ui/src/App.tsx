@@ -1,7 +1,20 @@
+import { createSignal, Show } from 'solid-js';
 import './App.css';
-import Row from './Row';
+import Row, { ITrack} from './Row';
+
+const t: ITrack = {
+  id: 1,
+  name: 'Canned Heat',
+  album: 'Synkronized',
+  artist: 'Jamiroquai',
+  trackNumber: 2,
+  genre: 'Funk',
+  duration: '4:20',
+  releaseYear: '1999',
+}
 
 function App() {
+  const [currentPlayingTrack, setCurrentPlayingTrack] = createSignal<ITrack | null>(null);
   return (
     <>
       <header class="navbar top-0 w-full bg-white pb-4 fixed h-[76px]">
@@ -9,18 +22,18 @@ function App() {
           <div id="nothing-playing" class="pl-20 hidden">
             Nothing playing
           </div>
-          <div id="now-playing-section" class="flex">
-            <div class="font-bold pl-20">
-                Now playing:
-            </div>
-            <div id="playing-track-id" class="hidden">1</div>
-            <div id="playing-track-name" class="now-playing-info">
-            </div>
-            <div id="playing-track-artist" class="now-playing-info">
-            </div>
-            <div id="playing-track-album" class="now-playing-info">
-            </div>
-          </div>
+          <Show when={currentPlayingTrack()} fallback={<div class="pl-20">Nothing Playing</div>}>
+            {(track) => 
+              <div id="now-playing-section" class="flex">
+                <div class="font-bold pl-20">
+                  Now playing:
+                </div>
+                <div id="playing-track-name" class="now-playing-info">{track().name}</div>
+                <div id="playing-track-artist" class="now-playing-info">{track().artist}</div>
+                <div id="playing-track-album" class="now-playing-info">{track().album}</div>
+              </div>
+            }
+          </Show>
           <div>
             <audio id="audio-player" class="pt-5 px-20 w-[90%]" controls preload="auto" data-playlist-id="0"></audio>
           </div>
@@ -41,7 +54,7 @@ function App() {
           </div>
         </div>
         <div class="w-full pt-76 table mt-20">
-          <Row />
+          <Row index={0} track={t} isPlaying={true} />
         </div>
       </div>
     </>

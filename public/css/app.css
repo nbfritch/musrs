@@ -50,11 +50,6 @@ header {
     width: 100%;
 }
 
-.divTableFoot {
-    display: table-footer-group;
-    font-weight: bold;
-}
-
 .divTableBody {
     width: 100%;
     padding-top: 76px;
