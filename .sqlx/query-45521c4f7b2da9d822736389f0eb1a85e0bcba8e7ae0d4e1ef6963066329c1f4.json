@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        select\n            id,\n            relative_path,\n            file_name,\n            file_extension,\n            first_path_segment,\n            second_path_segment\n        from filesystem_artifacts\n        where id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "relative_path",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "file_name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "file_extension",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "first_path_segment",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "second_path_segment",
+        "ordinal": 5,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "45521c4f7b2da9d822736389f0eb1a85e0bcba8e7ae0d4e1ef6963066329c1f4"
+}

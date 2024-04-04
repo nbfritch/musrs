@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        insert into track_metadata (\n            filesystem_artifact_id,\n            artist,\n            album,\n            track_name,\n            genre,\n            composer,\n            release_year,\n            track_number,\n            duration\n        ) values (\n            ?, ?, ?, ?, ?, ?, ?, ?, ? )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 9
+    },
+    "nullable": []
+  },
+  "hash": "4c027c0303c7e4df78bf00d16a7492fadb88857bcc41b7acaadb55b27b5081b1"
+}
