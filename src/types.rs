@@ -35,6 +35,7 @@ pub struct Song {
     pub full_path: String,
 }
 
+#[derive(Default)]
 pub struct TrackMetadata {
     pub file_artifact_id: i64,
     pub title: Option<String>,
@@ -45,22 +46,6 @@ pub struct TrackMetadata {
     pub genre: Option<String>,
     pub composer: Option<String>,
     pub track_number: Option<u16>,
-}
-
-impl Default for TrackMetadata {
-    fn default() -> Self {
-        Self {
-            file_artifact_id: 0,
-            title: None,
-            album: None,
-            artist: None,
-            year: None,
-            duration: None,
-            genre: None,
-            composer: None,
-            track_number: None,
-        }
-    }
 }
 
 #[derive(Serialize)]

@@ -37,7 +37,7 @@ pub async fn index(
     .map(|r| LibraryRow {
         id: r.id,
         track_name: r.track_name.clone(),
-        duration: r.duration.map(|d| pretty_duration(d)),
+        duration: r.duration.map(pretty_duration),
         artist: r
             .artist
             .clone()

@@ -30,7 +30,7 @@ impl AppStateStruct {
             context.insert("current_template", &current_template);
         }
 
-        let body = self.templates.render(template, &context)?;
+        let body = self.templates.render(template, context)?;
         Ok(HttpResponse::build(StatusCode::OK)
             .content_type(ContentType::html())
             .body(body))

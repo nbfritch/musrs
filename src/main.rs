@@ -36,7 +36,7 @@ async fn main() {
     let start_path = Path::new(&lib_path);
     println!("Loading library...");
     let songs: Vec<Song> = tokio::task::block_in_place(|| {
-        let extns = vec!["ogg", "flac", "mp3", "wav"];
+        let extns = ["ogg", "flac", "mp3", "wav"];
         let settings = Settings {
             allowed_extensions: extns.iter().map(|e| (**e).to_string()).collect(),
         };
