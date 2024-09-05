@@ -3,7 +3,6 @@
 ## Bugs:
 - Sort is case sensitive, should be insensitive
 - Web player plays next song id, not next song in list
-- Row highlighting is based off song id, not order in list
 
 ## Features:
 - Package as nix flake

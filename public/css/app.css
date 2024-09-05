@@ -11,14 +11,6 @@ header {
     padding-bottom: 8px;
 }
 
-.row-0:hover {
-    color: blue;
-}
-
-.row-1:hover {
-    color: blue;
-}
-
 .divTable {
     display: table;
     width: 100%;
@@ -28,7 +20,11 @@ header {
     display: table-row;
 }
 
-.divTableRow.row-0 {
+.divTableRow:hover {
+    color: blue;
+}
+
+.divTableRow:nth-child(even) {
     background-color: aliceblue;
 }
 

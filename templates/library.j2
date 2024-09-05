@@ -42,7 +42,7 @@ Music
     </div>
     <div class="divTableBody">
         {% for s in songs %}
-        <div id="song-{{s.id}}" data-songid="{{s.id}}" class="divTableRow row-{{ s.id % 2 }}">
+        <div id="song-{{s.id}}" data-songid="{{s.id}}" class="divTableRow">
             <div class="divTableCell col-id"></div>
             <div id="song-{{s.id}}-name" class="divTableCell col-track-name">{{s.track_name}}</div>
             <div class="divTableCell col-dur">{{s.duration}}</div>
