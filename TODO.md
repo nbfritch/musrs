@@ -1,8 +1,5 @@
 # TODO:
 
-## Bugs:
-- Sort is case sensitive, should be insensitive
-
 ## Features:
 - Package as nix flake
 - Style the audio player (Possibly to mimic old itunes)
