@@ -43,35 +43,55 @@ const setCurrentSongId = (songId) => {
     if (id != null) {
         id.innerHTML = `${songId}`;
     }
-}
+};
 
-const selectSong = (songId) => {
+const setCurrentPlaylistId = (playlistId) => {
+    const current = document.getElementById("playing-playlist-id");
+    if (current != null) {
+        current.innerHTML = `${playlistId}`;
+    }
+};
+
+const selectSongIndex = (idx) => {
     const audioElement = getPlayer();
+    const library = document.getElementById('library-body');
+    if (library == null) {
+        return;
+    }
+    const totalLibrarySongs = library.children.length;
+    const song = library.children[idx > totalLibrarySongs ? idx % totalLibrarySongs : idx];
+    if (song == null) {
+        return null;
+    }
+    const songIdStr = song.getAttribute('data-songid');
+    if (songIdStr == null) {
+        return;
+    }
+
+    const songId = parseInt(songIdStr, 10);
     audioElement.setAttribute('src', `/song/${songId}`);
     audioElement.setAttribute('data-songid', songId);
+    audioElement.setAttribute('data-playlistid', idx);
     displayNothingPlaying(false);
     setCurrentSongId(songId);
     displayTrackMetadata(songId);
     audioElement.play();
-};
+}
 
-const changeSong = (offset) => {
+const changeSongIdx = (offset) => {
     const audioElement = getPlayer();
-    const currentSongId = parseInt(audioElement.getAttribute('data-songid'), 10);
-    const nextSongId = currentSongId + offset;
-    setCurrentSongId(nextSongId);
-    audioElement.setAttribute('src', `/song/${nextSongId}`);
-    audioElement.setAttribute('data-songid', nextSongId);
-    displayTrackMetadata(nextSongId);
-    audioElement.play();
+    const currentPlaylistId = parseInt(audioElement.getAttribute('data-playlistid'), 10);
+    const nextPlaylistId = currentPlaylistId + offset;
+    selectSongIndex(nextPlaylistId);
+    setCurrentPlaylistId(currentPlaylistId + offset);
 };
 
 const nextSong = () => {
-    changeSong(1);
+    changeSongIdx(1);
 };
 
 const prevSong = () => {
-    changeSong(-1);
+    changeSongIdx(-1);
 };
 
 const togglePlay = () => {
@@ -113,13 +133,13 @@ const main = () => {
 
     const allRows = Array.from(document.getElementsByClassName('divTableRow'));
     allRows.forEach(tableEl => {
-        const songId = tableEl.getAttribute('data-songid');
-        if (songId == null) {
+        const playlistId = tableEl.getAttribute('data-playlistid');
+        if (playlistId == null) {
             return;
         }
         tableEl.addEventListener('click', (e) => {
             e.preventDefault();
-            selectSong(songId);
+            selectSongIndex(playlistId);
         });
     });
 };

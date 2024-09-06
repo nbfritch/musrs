@@ -2,7 +2,6 @@
 
 ## Bugs:
 - Sort is case sensitive, should be insensitive
-- Web player plays next song id, not next song in list
 
 ## Features:
 - Package as nix flake
