@@ -28,7 +28,7 @@ pub async fn index(
         left join track_metadata t
             on t.filesystem_artifact_id = f.id
         ) a
-        order by a.artist, a.album, a.track_number, a.track_name
+        order by lower(a.artist), lower(a.album), a.track_number, a.track_name
     "
     )
     .fetch_all(conn.as_mut())
