@@ -1,9 +1,10 @@
 [package]
 name = "musrs"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2021"
 
 [dependencies]
+actix-cors = "0.7.0"
 actix-files = "0.6.2"
 actix-web = "4"
 actix-web-static-files = "4.0.1"
@@ -12,6 +13,7 @@ audiotags = "0.4.1"
 dotenvy = "0.15.7"
 env_logger = "0.10.0"
 serde = { version = "1", features = ["derive"] }
+serde_json = "1.0.128"
 sqlx = { version = "0.7.1", features = ["sqlite", "runtime-tokio"] }
 static-files = "0.2.3"
 tera = { version = "1", default-features = false }
@@ -19,3 +21,4 @@ tokio = { version = "1", features = ["full"] }
 
 [build-dependencies]
 static-files = "0.2.1"
+clippy = { version = "*", optional = true }

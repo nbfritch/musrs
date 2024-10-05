@@ -1,4 +1,5 @@
 #![feature(type_alias_impl_trait)]
+mod db;
 mod errors;
 mod file_utils;
 mod routes;
@@ -11,6 +12,7 @@ use std::path::Path;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use actix_web_static_files::ResourceFiles;
 use file_utils::{crawl_dir, Settings};
+use routes::api;
 use sqlx::sqlite::SqlitePoolOptions;
 use types::Song;
 
@@ -36,7 +38,7 @@ async fn main() {
     let start_path = Path::new(&lib_path);
     println!("Loading library...");
     let songs: Vec<Song> = tokio::task::block_in_place(|| {
-        let extns = vec!["ogg", "flac", "mp3", "wav"];
+        let extns = ["ogg", "flac", "mp3", "wav"];
         let settings = Settings {
             allowed_extensions: extns.iter().map(|e| (**e).to_string()).collect(),
         };
@@ -70,6 +72,7 @@ async fn main() {
     }
 
     HttpServer::new(move || {
+        let cors = actix_cors::Cors::permissive();
         let generated = generate();
         let song_clone = songs.clone();
         let state = std::sync::Arc::new(AppStateStruct::new(
@@ -89,9 +92,11 @@ async fn main() {
         ));
 
         App::new()
+            .wrap(cors)
             .wrap(Logger::default())
             .service(ResourceFiles::new("/static", generated))
             .service(web::resource("/").to(index))
+            .service(web::resource("/api/songs").to(api::get_songs))
             .service(get_song)
             .app_data(web::Data::new(state))
             .app_data(web::Data::new(song_clone))
@@ -101,5 +106,5 @@ async fn main() {
     .expect("Could not bind address")
     .run()
     .await
-    .expect("Could not start server");
+    .expect("Could not start server")
 }

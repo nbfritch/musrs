@@ -5,4 +5,3 @@ library.db
 *.tar.gz
 musrs-release-*
 dev.db
-library/
