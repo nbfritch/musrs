@@ -1,0 +1,131 @@
+body {
+  width: 100%;
+  margin: 0;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
+  padding-bottom: 8px;
+}
+
+.divTable {
+  display: table;
+  width: 100%;
+}
+
+.divTableRow {
+  display: table-row;
+}
+
+.divTableRow:hover {
+  color: blue;
+}
+
+.divTableRow:nth-child(even) {
+  background-color: aliceblue;
+}
+
+.divTableHeading {
+  background-color: #EEE;
+  display: table-header-group;
+}
+
+.divTableCell,
+.divTableHead {
+  display: table-cell;
+}
+
+.divTableHeading {
+  display: table-header-group;
+  font-weight: bold;
+  position: fixed;
+  top: 76px;
+  width: 100%;
+}
+
+.divTableFoot {
+  display: table-footer-group;
+  font-weight: bold;
+}
+
+.divTableBody {
+  width: 100%;
+  padding-top: 76px;
+  display: table;
+  margin-top: 20px;
+}
+
+.divTableBody .divTableRow:last-child .divTableCell {
+  height: 200px;
+}
+
+.col-id {
+  width: 2%;
+}
+
+.col-track-name {
+  width: 32%;
+}
+
+.col-dur {
+  width: 2%;
+}
+
+.col-artist {
+  width: 22%;
+  padding-left: 10px;
+}
+
+.col-album {
+  width: 19%
+}
+
+.col-track-num {
+  width: 3%;
+}
+
+.col-genre {
+  width: 10%;
+}
+
+.col-year {
+  width: 8%
+}
+
+body {
+  font-family: sans;
+}
+
+#now-playing-section {
+  display: flex;
+}
+
+#now-playing-section.hidden {
+  display: none;
+}
+
+#audio-player {
+  padding-top: 5px;
+  padding-left: 20px;
+  padding-right: 20px;
+  width: 90%;
+}
+
+li {
+  list-style: none;
+}
+
+.now-playing-info {
+  padding-left: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+.bold {
+  font-weight: bold;
+}
