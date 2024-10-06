@@ -8,6 +8,8 @@ export type RootState = ReturnType<typeof rootReducer>;
 
 export const makeStore = (preloadedState?: Partial<RootState>) => {
   const store = configureStore({
+    // TODO: Only in dev
+    devTools: true,
     reducer: rootReducer,
     middleware: getDefaultMiddleware => {
       return getDefaultMiddleware()
