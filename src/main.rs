@@ -17,7 +17,7 @@ use sqlx::sqlite::SqlitePoolOptions;
 use types::Song;
 
 use crate::{
-    file_utils::startup_scan, routes::index::index, routes::song::get_song, state::AppStateStruct,
+    file_utils::startup_scan, routes::song::get_song, state::AppStateStruct,
 };
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
@@ -52,8 +52,6 @@ async fn main() {
     });
     println!("Done loading library. Loaded {} songs", songs.len());
 
-    let template_folder = Path::new("./templates");
-
     let db_url = var("DATABASE_URL").expect("'DATABASE_URL is required");
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
@@ -76,28 +74,15 @@ async fn main() {
         let generated = generate();
         let song_clone = songs.clone();
         let state = std::sync::Arc::new(AppStateStruct::new(
-            {
-                let mut tera = tera::Tera::new(
-                    &(template_folder
-                        .to_str()
-                        .expect("Cannot load templates folder")
-                        .to_string()
-                        + "/**/*"),
-                )
-                .expect("Paring error loading templates folder");
-                tera.autoescape_on(vec!["j2"]);
-                tera
-            },
             lib_path.clone(),
         ));
 
         App::new()
             .wrap(cors)
             .wrap(Logger::default())
-            .service(ResourceFiles::new("/static", generated))
-            .service(web::resource("/").to(index))
             .service(web::resource("/api/songs").to(api::get_songs))
             .service(get_song)
+            .service(ResourceFiles::new("/", generated))
             .app_data(web::Data::new(state))
             .app_data(web::Data::new(song_clone))
             .app_data(web::Data::new(pool.clone()))

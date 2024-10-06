@@ -47,7 +47,7 @@ async fn get_song(
     });
 
     if song.is_none() {
-        return Err(crate::errors::GenError::OtherError(
+        return Err(crate::errors::GenError::Other(
             "song not found in db".into(),
         ));
     }
