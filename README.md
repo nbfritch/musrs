@@ -18,10 +18,12 @@ Code is not ideal, it blocks in place on startup and there are `.clone()`s every
 - Rust stdlib
 - tokio (async runtime)
 - actix (web framework)
-- tera (jinja-style templates)
 - serde (serialization)
 - env_logger (logging)
 - static-files (bundling assets into binary)
 - actix-web-static-files (static-files integration for actix)
+- Bun
+- Preact
+- Redux
 
 See TODO.md for planned features
