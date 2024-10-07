@@ -59,4 +59,5 @@ pub struct LibraryRow {
     pub genre: Option<String>,
     pub composer: Option<String>,
     pub release_year: Option<u16>,
+    pub is_present: bool,
 }

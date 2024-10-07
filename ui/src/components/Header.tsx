@@ -9,7 +9,7 @@ const NowPlaying = ({ song }: { song: ISong | undefined }) => {
     </div>)
   }
   return (
-    <div id="now-playing-section" class="hidden">
+    <div id="now-playing-section">
       <div class="bold now-playing-info">
         Now playing:
       </div>
@@ -38,7 +38,7 @@ export const Header = () => {
           <audio
             id="audio-player"
             controls
-            src={playingSong == null ? undefined : `http://localhost:3000/song/${playingSong.id}`}
+            src={playingSong == null ? undefined : `/song/${playingSong.id}`}
             onCanPlay={() => dispatch(setPlayingState(true))}
             onEnded={() => dispatch(goToNextPlaylistTrack())}
             onPlay={() => dispatch(setPlayingState(true))}

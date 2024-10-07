@@ -20,6 +20,7 @@ export interface PlayerStateSlice {
 
 export interface IPlaySongAction {
   song: ISong;
+  playlistIndex: number;
   playlistId: "library" | number;
 }
 
@@ -60,24 +61,24 @@ export const playerSlice = createAppSlice({
       if (state.player.playingSongIndex == null) {
         // We weren't playing before
         state.player.playingSongIndex = 0;
-        const nextSongId = state.library.libraryPlaylist[state.player.playingSongIndex];
-        const maybeNextSong = state.library.songs.find(song => song.id = nextSongId);
-        if (maybeNextSong != null) {
-          state.player.playingSong = maybeNextSong;
-        }
-        return
       }
 
-      const maybeNextIndex = state.player.playingSongIndex + 1;
-      const nextSongId = state.library.libraryPlaylist[maybeNextIndex];
-      const maybeNextSong = state.library.songs.find(song => song.id = nextSongId);
+      let maybeNextIndex = state.player.playingSongIndex + 1;
+      let nextSongId = state.library.libraryPlaylist[maybeNextIndex];
+      let maybeNextSong = state.library.songs.find(song => song.id === nextSongId);
+      while (maybeNextIndex < state.library.songs.length && maybeNextSong?.is_present === false) {
+        maybeNextIndex = maybeNextIndex + 1;
+        nextSongId = state.library.libraryPlaylist[maybeNextIndex];
+        maybeNextSong = state.library.songs.find(song => song.id === nextSongId);
+      }
+
       if (maybeNextSong != null) {
         state.player.playingSong = maybeNextSong;
         state.player.playingSongIndex = maybeNextIndex;
       }
     }),
     loadLibrary: create.asyncThunk(async () => {
-      const resp = await (await fetch('http://localhost:3000/api/songs')).json() as IGetLibraryResponse;
+      const resp = await (await fetch('/api/songs')).json() as IGetLibraryResponse;
       return resp;
     }, {
       pending: state => {
@@ -95,6 +96,7 @@ export const playerSlice = createAppSlice({
     }),
     playSong: create.reducer((state, action: PayloadAction<IPlaySongAction>) => {
       state.player.playingPlaylistId = action.payload.playlistId;
+      state.player.playingSongIndex = action.payload.playlistIndex;
       state.player.playingSong = action.payload.song;
       state.player.playing = true;
     }),

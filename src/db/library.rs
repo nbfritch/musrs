@@ -18,7 +18,8 @@ pub async fn get_library(mut conn: PoolConnection<Sqlite>) -> Result<Vec<Library
             t.composer,
             t.release_year,
             t.duration,
-            t.track_number
+            t.track_number,
+            f.is_present
         from filesystem_artifacts f
         left join track_metadata t
             on t.filesystem_artifact_id = f.id
@@ -47,6 +48,7 @@ pub async fn get_library(mut conn: PoolConnection<Sqlite>) -> Result<Vec<Library
         genre: r.genre.clone(),
         composer: r.composer.clone(),
         release_year: r.release_year.map(|t| t as u16),
+        is_present: r.is_present != 0,
     })
     .collect::<Vec<_>>())
 }

@@ -7,4 +7,5 @@ export interface ISong {
   album: string;
   genre?: string;
   release_year?: string;
+  is_present: boolean;
 }

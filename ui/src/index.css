@@ -16,6 +16,10 @@ header {
   width: 100%;
 }
 
+.missingSong {
+  color: #aa0000;
+}
+
 .divTableRow {
   display: table-row;
 }
@@ -103,10 +107,6 @@ body {
   display: flex;
 }
 
-#now-playing-section.hidden {
-  display: none;
-}
-
 #audio-player {
   padding-top: 5px;
   padding-left: 20px;
@@ -120,10 +120,6 @@ li {
 
 .now-playing-info {
   padding-left: 20px;
-}
-
-.hidden {
-  display: none;
 }
 
 .bold {
