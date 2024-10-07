@@ -11,7 +11,7 @@ pub struct Settings {
     pub allowed_extensions: Vec<String>,
 }
 
-fn parse_path(allowed_extensions: &Vec<String>, rel_path: &Path) -> Option<PartialSong> {
+fn parse_path(allowed_extensions: &[String], rel_path: &Path) -> Option<PartialSong> {
     let ext = rel_path.extension();
     if let Some(extension) = ext {
         let parsed_extension = String::from(extension.to_str().unwrap());
@@ -199,9 +199,9 @@ async fn find_or_create_song(conn: &mut PoolConnection<Sqlite>, song: &Song) -> 
     Ok(created_id)
 }
 
-pub async fn startup_scan(
+pub async fn scan_for_unadded(
     base_path: &Path,
-    files: &Vec<Song>,
+    files: &[Song],
     db: &Pool<Sqlite>,
 ) -> anyhow::Result<()> {
     // for each song
@@ -232,5 +232,31 @@ pub async fn startup_scan(
         }
     }
 
+    Ok(())
+}
+
+pub async fn scan_and_flag_missing(base_path: &Path, db: &Pool<Sqlite>,) -> anyhow::Result<()> {
+    let mut conn = db.acquire().await?;
+    let songs = sqlx::query!("
+        select
+            id,
+            relative_path,
+            is_present
+        from filesystem_artifacts
+    ").fetch_all(conn.as_mut()).await?.iter().map(|r| (r.id, r.relative_path.clone(), r.is_present)).collect::<Vec::<_>>();
+    for song in songs.iter() {
+        let song_path = base_path.join(song.1.clone());
+        let song_exists = fs::exists(song_path).unwrap_or(false);
+        if !song_exists {
+            let update_res = sqlx::query!("
+                update filesystem_artifacts
+                set is_present = 0
+                where id = ?
+            ", song.0).execute(conn.as_mut()).await?;
+            if update_res.rows_affected() == 1 {
+                println!("Missing: {}", song.1);
+            }
+        }
+    }
     Ok(())
 }

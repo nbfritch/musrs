@@ -11,13 +11,13 @@ use std::path::Path;
 
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use actix_web_static_files::ResourceFiles;
-use file_utils::{crawl_dir, Settings};
+use file_utils::{crawl_dir, scan_and_flag_missing, Settings};
 use routes::api;
 use sqlx::sqlite::SqlitePoolOptions;
 use types::Song;
 
 use crate::{
-    file_utils::startup_scan, routes::song::get_song, state::AppStateStruct,
+    file_utils::scan_for_unadded, routes::song::get_song, state::AppStateStruct,
 };
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
@@ -59,13 +59,23 @@ async fn main() {
         .await
         .expect("Could not connect to db");
 
-    let startup_res = startup_scan(start_path, &songs, &pool).await;
+    let startup_res = scan_for_unadded(start_path, &songs, &pool).await;
     match startup_res {
         Ok(()) => {
             println!("Startup succeeded");
         }
         Err(e) => {
             println!("Error during startup scan {}", e);
+        }
+    }
+
+    let missing_res = scan_and_flag_missing(start_path, &pool).await;
+    match missing_res {
+        Ok(()) => {
+            println!("Task: Scan missing succeeded");
+        },
+        Err(e) => {
+            println!("Task: Scan missing failed with error: {}", e);
         }
     }
 
