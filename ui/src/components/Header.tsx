@@ -1,6 +1,12 @@
+import { useEffect, useRef } from "preact/hooks";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { getPlayingSong, getPlayingState, goToNextPlaylistTrack, setPlayingState } from "../features/player/playerSlice";
+import { getPlayerState, getPlayingSong, getPlayingState, goToNextPlaylistTrack, setPlayingState, setTrackDuration, setTrackPlaybackPosition } from "../features/player/playerSlice";
 import { ISong } from "../types/songs";
+import { getUrl } from "../utils/url";
+import PlaybackControls from "./Controls";
+import GlobalSearch from "./GlobalSearch";
+import TrackDisplay from "./TrackDisplay";
+import VolumeSlider from "./VolumeSlider";
 
 const NowPlaying = ({ song }: { song: ISong | undefined }) => {
   if (song == null) {
@@ -30,24 +36,51 @@ export const Header = () => {
   const playingSong = useAppSelector(getPlayingSong);
   const dispatch = useAppDispatch();
   const playingState = useAppSelector(getPlayingState);
+  const playerState = useAppSelector(getPlayerState);
+  const audioElementRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (playerState.playing === false) {
+      audioElementRef?.current?.pause();
+    } else {
+      audioElementRef?.current?.play();
+    }
+  }, [playerState.playing]);
+
   return (
-    <header class="navbar">
-      <nav>
-        <NowPlaying song={playingSong} />
-        <div>
-          <audio
-            id="audio-player"
-            controls
-            src={playingSong == null ? undefined : `/song/${playingSong.id}`}
-            onCanPlay={() => dispatch(setPlayingState(true))}
-            onEnded={() => dispatch(goToNextPlaylistTrack())}
-            onPlay={() => dispatch(setPlayingState(true))}
-            onPause={() => dispatch(setPlayingState(false))}
-            preload="auto"
-            autoPlay={playingState}>
-          </audio>
-        </div>
-      </nav>
+    <header class="w-full h-20 fixed top-0 overflow-hidden bg-slate-200 flex flex-row border-solid border-1 border-slate-500">
+      <div id="playback-controls" class="basis-2/12 text-center">
+        <PlaybackControls />
+      </div>
+      <div id="volume-slider" class="basis-2/12 text-center">
+        <VolumeSlider />
+      </div>
+      <div id="current-song-display" class="basis-4/12 text-center">
+        <TrackDisplay song={playingSong} />
+      </div>
+      <div id="global-search-bar" class="basis-4/12 text-center">
+        <GlobalSearch />
+      </div>
+      <audio
+        id="audio-player"
+        ref={audioElementRef}
+        style="display: none"
+        controls
+        src={playingSong == null ? undefined : getUrl(`/song/${playingSong.id}`)}
+        volume={playerState.volume}
+        onCanPlay={() => dispatch(setPlayingState(true))}
+        onEnded={() => dispatch(goToNextPlaylistTrack())}
+        onPlay={() => dispatch(setPlayingState(true))}
+        onPause={() => dispatch(setPlayingState(false))}
+        onDurationChange={(e) => {
+          dispatch(setTrackDuration(e.currentTarget.duration))
+        }}
+        onTimeUpdate={(e) => {
+          dispatch(setTrackPlaybackPosition(e.currentTarget.currentTime))
+        }}
+        preload="auto"
+        autoPlay={playingState}>
+      </audio>
     </header>
   );
 };

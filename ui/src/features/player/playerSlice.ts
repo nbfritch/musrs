@@ -2,6 +2,7 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../../app/createAppSlice";
 import { IGetLibraryResponse } from "../../types/apiResponse";
 import { ISong } from "../../types/songs";
+import { getUrl } from "../../utils/url";
 
 export interface PlayerStateSlice {
   player: {
@@ -9,6 +10,9 @@ export interface PlayerStateSlice {
     playingPlaylistId: "library" | number;
     playingSongIndex?: number;
     playingSong?: ISong;
+    volume?: number;
+    trackDuration?: number;
+    trackPosition?: number;
   };
   library: {
     libraryPlaylist?: Array<number>;
@@ -44,6 +48,15 @@ export const playerSlice = createAppSlice({
     setPlayingState: create.reducer((state, action: PayloadAction<boolean>) => {
       state.player.playing = action.payload;
     }),
+    setVolume: create.reducer((state, action: PayloadAction<number>) => {
+      state.player.volume = action.payload;
+    }),
+    setTrackDuration: create.reducer((state, action: PayloadAction<number>) => {
+      state.player.trackDuration = action.payload;
+    }),
+    setTrackPlaybackPosition: create.reducer((state, action: PayloadAction<number>) => {
+      state.player.trackPosition = action.payload;
+    }),
     goToNextPlaylistTrack: create.reducer(state => {
       if (state.library.libraryPlaylist == null || state.library.libraryPlaylist.length == 0 || state.library.songs == null) {
         // No music available to play
@@ -78,7 +91,7 @@ export const playerSlice = createAppSlice({
       }
     }),
     loadLibrary: create.asyncThunk(async () => {
-      const resp = await (await fetch('/api/songs')).json() as IGetLibraryResponse;
+      const resp = await (await fetch(getUrl('/api/songs'))).json() as IGetLibraryResponse;
       return resp;
     }, {
       pending: state => {
@@ -110,4 +123,4 @@ export const playerSlice = createAppSlice({
 });
 
 export const { getLibraryState, getPlayerState, getPlayingSong, getPlayingState } = playerSlice.selectors;
-export const { togglePlaying, loadLibrary, playSong, setPlayingState, goToNextPlaylistTrack } = playerSlice.actions
+export const { togglePlaying, loadLibrary, playSong, setPlayingState, goToNextPlaylistTrack, setTrackDuration, setTrackPlaybackPosition, setVolume } = playerSlice.actions
