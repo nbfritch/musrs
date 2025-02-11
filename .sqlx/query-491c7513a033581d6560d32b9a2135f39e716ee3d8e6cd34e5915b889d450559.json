@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                update filesystem_artifacts\n                set is_present = 0\n                where id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "491c7513a033581d6560d32b9a2135f39e716ee3d8e6cd34e5915b889d450559"
+}

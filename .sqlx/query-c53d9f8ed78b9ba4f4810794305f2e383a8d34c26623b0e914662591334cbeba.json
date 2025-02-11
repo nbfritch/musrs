@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            select filesystem_artifact_id from track_metadata\n            where filesystem_artifact_id = ?\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "filesystem_artifact_id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c53d9f8ed78b9ba4f4810794305f2e383a8d34c26623b0e914662591334cbeba"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        select\n            id,\n            relative_path,\n            is_present\n        from filesystem_artifacts\n    ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "relative_path",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "is_present",
+        "ordinal": 2,
+        "type_info": "Int"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "4547e80073ad9366ef0a0c7e78407ecf3b3968877afa7aa06bcccfea141dcfca"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        select \n            f.id\n        from filesystem_artifacts f\n        where\n            f.file_name = ?\n            and f.file_extension = ?\n            and f.relative_path = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ce9152b0d504a1d7ea3357d23cd642c9825572054f95b54432c1d7f00a69cbf8"
+}

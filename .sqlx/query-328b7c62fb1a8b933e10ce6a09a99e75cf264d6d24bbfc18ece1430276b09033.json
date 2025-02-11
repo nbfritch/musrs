@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        insert into filesystem_artifacts (\n            relative_path,\n            file_name,\n            file_extension,\n            is_present,\n            first_path_segment,\n            second_path_segment,\n            created_at,\n            updated_at\n        ) values (\n            ?, ?, ?, TRUE, ?, ?, ?, NULL\n        ) returning id;",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "328b7c62fb1a8b933e10ce6a09a99e75cf264d6d24bbfc18ece1430276b09033"
+}
