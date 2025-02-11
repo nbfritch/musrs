@@ -1,0 +1,11 @@
+target/
+.env/
+.env.example
+.gitignore
+.env
+.env.example
+*.md
+*.sql
+musrs.service
+.editorconfig
+.vscode/
