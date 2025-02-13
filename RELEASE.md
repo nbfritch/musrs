@@ -6,6 +6,7 @@
 - `podman run -it -d -v /outside-musr-dir:/app/mus_dir -v /outside-library.db:/app/library.db -p 8080:8080 <container id>`
 - When the container is running, get the running container id with `podman ps`. It should look something like `38e60ffbb258`
 - Name the container musrs with `podman commit 38e60ffbb258 musrs`
+- Tag the container `localhost/musrs` with tag `<registry_host>/<registry_name>/musrs`
 - Login to the local container registry using `podman login <url>` and enter username and password.
 - Push to the container registry with `podman push <registry-host>/<registry_name>/musrs:latest`
 
