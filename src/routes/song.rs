@@ -1,5 +1,4 @@
-use actix_files::NamedFile;
-use actix_web::{get, head, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{get, head, http, web, HttpResponse, HttpResponseBuilder, Responder};
 use sqlx::{Pool, Sqlite};
 
 use crate::types::Song;
@@ -14,8 +13,6 @@ async fn song_head() -> super::GenResponse {
 
 #[get("/song/{song_id}")]
 async fn get_song(
-    request: HttpRequest,
-    state: web::Data<crate::state::AppState>,
     db: web::Data<Pool<Sqlite>>,
     path: web::Path<u64>,
 ) -> Result<impl Responder, crate::errors::GenError> {
@@ -52,9 +49,12 @@ async fn get_song(
         ));
     }
     let song = song.unwrap();
-    let base_path = state.into_inner().library_path.clone();
-    let absolute_path = std::path::Path::new(&base_path).join(song.full_path);
-    let f = NamedFile::open(absolute_path)?;
-
-    Ok(f.into_response(&request))
+    let song_path_buf = std::path::Path::new("/privatefiles").join(song.full_path);
+    let song_path = song_path_buf.to_string_lossy();
+    Ok(HttpResponseBuilder::new(http::StatusCode::OK)
+        .insert_header((
+            "X-Accel-Redirect",
+            http::header::HeaderValue::from_str(&song_path).unwrap(),
+        ))
+        .finish())
 }

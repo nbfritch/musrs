@@ -3,9 +3,9 @@ Description=Web music player portal
 
 [Service]
 WorkingDirectory=/usr/local/musrs
-Environment=MUS_DIR=/tank/filesystem/Media/Library/Music
-Environment=WEB_PORT=4000
-Environment=WEB_ADDRESS=0.0.0.0
+Environment=MUS_DIR=/var/fs/storage/media/music
+Environment=WEB_PORT=3200
+Environment=WEB_ADDR=127.0.0.1
 Environment=DATABASE_URL=library.db
 ReadWritePaths=/usr/local/musrs
 ExecStart=/usr/local/musrs/musrs
